@@ -19,7 +19,24 @@
                             Success Panel
                         </div>
                         <div class="panel-body">
-                                {{ info }}
+                                {# info #}
+
+
+
+                            {% for key, value in info.items() %}
+                        <p>
+                            {% if key == 'height' %}
+                            <span>height: {{ value }}</span>
+                            {% elif key == width %}
+                            <span>width: {{ value }}</span>
+                            {% endif %}
+
+                        </p>
+                        {% endfor %}
+
+
+
+
                         </div>
                         <div class="panel-footer">
                             Panel Footer

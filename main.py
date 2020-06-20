@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from werkzeug import secure_filename
 import os
 import ffmpeg
+import json
 # from sqlalchemy import create_engine, MetaData, Table
 import subprocess
 import sys
@@ -52,7 +53,21 @@ def videoInfo():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             info = ffmpeg.probe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return render_template('videoInfo.html', info=info, title=u'اطلاعات ویدیو')
+
+            video_stream = next((stream for stream in info['streams'] if stream['codec_type'] == 'video'), None)
+            if video_stream is None:
+                print('No video stream found')
+                sys.exit(1)
+
+            # width = int(video_stream['width'])
+            # height = int(video_stream['height'])
+            # num_frames = int(video_stream['has_b_frames'])
+            # print('width: {}'.format(width))
+            # print('height: {}'.format(height))
+            # print('num_frames: {}'.format(num_frames))
+            print(video_stream)
+
+            return render_template('videoInfo.html', info=video_stream, title=u'اطلاعات ویدیو')
     return render_template('videoInfo.html', title=u'اطلاعات ویدیو')
 
 
