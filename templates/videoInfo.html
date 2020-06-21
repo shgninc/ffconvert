@@ -15,51 +15,54 @@
 
                         {% if info %}
                         <div class="panel panel-success">
-                        <div class="panel-heading">
-                            Success Panel
-                        </div>
-                        <div class="panel-body">
-                                {# info #}
+                            <div class="panel-heading">
+                                Success Panel
+                            </div>
+                            <div class="panel-body">
 
-
-
-                            {% for key, value in info.items() %}
-                        <p>
-                            {% if key == 'height' %}
-                            <span>height: {{ value }}</span>
-                            {% elif key == width %}
-                            <span>width: {{ value }}</span>
-                            {% endif %}
-
-                        </p>
-                        {% endfor %}
-
-
-
-
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Value</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for key, value in info.items() %}
+                                        <tr>
+                                            <td>{{ key }}</td>
+                                            <td>{{ value }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
                         </div>
                         <div class="panel-footer">
                             Panel Footer
                         </div>
                     </div>
-                            {% endif %}
+                    {% endif %}
 
 
-                        <form role="form" action="{{ url_for('videoInfo') }}" method="post" novalidate
-                              enctype="multipart/form-data">
-                            <div class="form-group">
-                                <input type="file" name="file"/>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-default">Upload</button>
-                            </div>
-                        </form>
+                    <form role="form" action="{{ url_for('videoInfo') }}" method="post" novalidate
+                          enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="file" name="file"/>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-default">Upload</button>
+                        </div>
+                    </form>
 
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 {% endblock %}

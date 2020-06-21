@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
+
+# https://github.com/kkroening/ffmpeg-python
+# https://kkroening.github.io/ffmpeg-python/
+
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 import os
 import ffmpeg
-import json
+# import json
 # from sqlalchemy import create_engine, MetaData, Table
-import subprocess
+# import subprocess
 import sys
-from pprint import pprint
+# from pprint import pprint
 from importlib import reload
 
 if sys.version[0] == '2':
@@ -19,7 +23,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['UPLOAD_FOLDER'] = './uploads/'
 # 16 megabytes
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = {'mp3', 'mp4', 'mkv', 'wav', 'ogg', 'wmv'}
 
@@ -52,20 +56,22 @@ def videoInfo():
             info = None
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            info = ffmpeg.probe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            try:
+                info = ffmpeg.probe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            except ffmpeg.Error as e:
+                print(e.stderr)
+                sys.exit(1)
 
             video_stream = next((stream for stream in info['streams'] if stream['codec_type'] == 'video'), None)
             if video_stream is None:
                 print('No video stream found')
                 sys.exit(1)
-
-            # width = int(video_stream['width'])
-            # height = int(video_stream['height'])
-            # num_frames = int(video_stream['has_b_frames'])
-            # print('width: {}'.format(width))
-            # print('height: {}'.format(height))
-            # print('num_frames: {}'.format(num_frames))
-            print(video_stream)
+            key1 = 'disposition'
+            key2 = 'tags'
+            if key1 in video_stream:
+                del video_stream[key1]
+            if key2 in video_stream:
+                del video_stream[key2]
 
             return render_template('videoInfo.html', info=video_stream, title=u'اطلاعات ویدیو')
     return render_template('videoInfo.html', title=u'اطلاعات ویدیو')
