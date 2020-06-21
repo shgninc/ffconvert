@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, flash, redirect, url_for
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 import os
 import ffmpeg
 import json
