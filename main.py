@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import RequestEntityTooLarge
 import os
 import ffmpeg
 # import json
@@ -23,7 +24,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['UPLOAD_FOLDER'] = './uploads/'
 # 16 megabytes
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # * 1024
 
 ALLOWED_EXTENSIONS = {'mp3', 'mp4', 'mkv', 'wav', 'ogg', 'wmv'}
 
@@ -42,11 +43,19 @@ def index():
 @app.route('/videoInfo', methods=['GET', 'POST'])
 def videoInfo():
     if request.method == 'POST':
+        try:
+            file = request.files['file']
+            print('hee')
+        except RequestEntityTooLarge as e:
+            # we catch RequestEntityTooLarge exception
+            app.logger.info(e)
+            return render_template('videoInfo.html', error=e, title=u'اطلاعات ویدیو')
+
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
-        file = request.files['file']
+
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
@@ -72,10 +81,8 @@ def videoInfo():
                 del video_stream[key1]
             if key2 in video_stream:
                 del video_stream[key2]
-
             return render_template('videoInfo.html', info=video_stream, title=u'اطلاعات ویدیو')
     return render_template('videoInfo.html', title=u'اطلاعات ویدیو')
-
 
 @app.route('/uploader', methods=['GET', 'POST'])
 def upload_file():
