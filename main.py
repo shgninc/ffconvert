@@ -13,7 +13,7 @@ import ffmpeg
 # from sqlalchemy import create_engine, MetaData, Table
 # import subprocess
 import sys
-# from pprint import pprint
+from pprint import pprint
 from importlib import reload
 
 if sys.version[0] == '2':
@@ -24,7 +24,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['UPLOAD_FOLDER'] = './uploads/'
 # 16 megabytes
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  * 1024
 
 ALLOWED_EXTENSIONS = {'mp3', 'mp4', 'mkv', 'wav', 'ogg', 'wmv'}
 
@@ -43,18 +43,31 @@ def index():
 @app.route('/videoInfo', methods=['GET', 'POST'])
 def videoInfo():
     if request.method == 'POST':
-        try:
-            file = request.files['file']
-            print('hee')
-        except RequestEntityTooLarge as e:
-            # we catch RequestEntityTooLarge exception
-            app.logger.info(e)
-            return render_template('videoInfo.html', error=e, title=u'اطلاعات ویدیو')
-
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
+
+        # https: // www.programcreek.com / python / example / 105928 / flask.request.content_length
+        file_size = request.content_length / (1024 * 1024)
+        print(file_size)
+        if float(file_size) > 50:
+            flash('File size is too large')
+            return redirect(request.url)
+
+        try:
+            file = request.files['file']
+        except RequestEntityTooLarge as e:
+            # we catch RequestEntityTooLarge exception
+            app.logger.info(e)
+            print('hellosads')
+            request.files['file'] = None
+            # return render_template('index.html', title=u'مدیریت سرویسها')
+            redirect(request.path,code=302)
+            # return render_template('videoInfo.html', error=e, title=u'اطلاعات ویدیو')
+            exit(1)
+
+
 
         # if user does not select file, browser also
         # submit an empty part without filename
@@ -69,7 +82,7 @@ def videoInfo():
                 info = ffmpeg.probe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             except ffmpeg.Error as e:
                 print(e.stderr)
-                sys.exit(1)
+                # sys.exit(1)
 
             video_stream = next((stream for stream in info['streams'] if stream['codec_type'] == 'video'), None)
             if video_stream is None:
